@@ -2,7 +2,6 @@
 
 require_once("../config/database.php");
 
-echo"Connection éffectuée";
 
 $messagesStatement = $conn->prepare("INSERT INTO messages (sender_id, receiver_id, text, created_at) VALUES (:sender_id, :receiver_id, :text, :created_at)");
 $messagesStatement->execute([
@@ -11,6 +10,6 @@ $messagesStatement->execute([
     "text"=> $_GET["text"],
     "created_at" => time()
 ]);
-echo"Message inséré";
+
 
 
