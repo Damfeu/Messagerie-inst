@@ -1,0 +1,6 @@
+config/config.php
+storage/*
+!storage/.gitignore
+!storage/.htaccess
+.DS_Store
+Thumbs.db

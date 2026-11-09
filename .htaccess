@@ -1,0 +1,7 @@
+# Utile sous XAMPP ou un hébergement mutualisé, quand la racine web ne peut pas
+# pointer directement sur public/. En production, pointez la racine sur public/.
+DirectoryIndex index.php
+Options -Indexes
+<FilesMatch "\.(md|sql|bat|example\.php)$">
+    Require all denied
+</FilesMatch>
