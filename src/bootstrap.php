@@ -12,6 +12,13 @@ if (!is_file($configFile)) {
 }
 $CONFIG = require $configFile;
 
+// Tests : avec le serveur intégré de PHP uniquement, DSEND_TEST_DB=test.sqlite utilise une base
+// séparée dans storage/, pour ne jamais toucher à la vraie base. Sans effet sous Apache/Nginx.
+$testDb = getenv('DSEND_TEST_DB');
+if (PHP_SAPI === 'cli-server' && is_string($testDb) && preg_match('/^[\w-]+\.sqlite$/', $testDb)) {
+    $CONFIG['db'] = ['dsn' => 'sqlite:' . __DIR__ . '/../storage/' . $testDb, 'user' => null, 'password' => null];
+}
+
 /* ---------- En-têtes de sécurité (OWASP A05) ---------- */
 header("Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' blob: data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'none'");
 header('X-Content-Type-Options: nosniff');
@@ -129,7 +136,7 @@ function json_error(string $message, int $status = 400): never
 
 function json_input(): array
 {
-    $raw = file_get_contents('php://input', false, null, 0, 12 * 1024 * 1024);
+    $raw = file_get_contents('php://input', false, null, 0, 20 * 1024 * 1024);
     $data = json_decode($raw ?: '', true);
     if (!is_array($data)) {
         json_error('Requête invalide.');

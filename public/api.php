@@ -146,7 +146,8 @@ switch ("$method $action") {
         if (!$to || $to === $uid || !in_array($kind, ['text', 'file'], true)) {
             json_error('Destinataire ou type invalide.');
         }
-        $maxCipher = (int) ceil(($CONFIG['max_file_bytes'] + 4096) * 4 / 3);
+        // Le fichier est encodé en base64 dans le JSON chiffré, puis le chiffré est lui-même en base64.
+        $maxCipher = (int) ceil((($CONFIG['max_file_bytes'] * 4 / 3) + 4096) * 4 / 3) + 64;
         $iv = b64_field($in, 'iv', 24);
         $cipher = b64_field($in, 'ciphertext', $kind === 'file' ? $maxCipher : 200000);
         if (!user_row($to)) {

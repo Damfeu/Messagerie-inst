@@ -1,0 +1,14 @@
+{
+  "name": "d-send",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Messagerie chiffrée de bout en bout — outils de test uniquement",
+  "scripts": {
+    "test": "npm run test:securite && npm run test:e2e",
+    "test:securite": "bash tests/securite.sh",
+    "test:e2e": "node tests/e2e.js"
+  },
+  "devDependencies": {
+    "playwright": "^1.65.0"
+  }
+}

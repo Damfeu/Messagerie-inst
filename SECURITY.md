@@ -13,9 +13,9 @@
 
 **Ce que voit le serveur :** les adresses e-mail, qui écrit à qui et quand, la taille des messages. **Ce qu'il ne voit pas :** le mot de passe, les clés privées, le contenu des messages, les fichiers et leurs noms.
 
-## Audit de la v1 (2024) et corrections
+## Audit de la v1 (écrite en 2024) et corrections
 
-Audit réalisé en novembre 2026 sur la première version, en la faisant tourner et en l'attaquant.
+Audit réalisé en novembre 2026 sur la première version, en la faisant tourner et en l'attaquant : 9 failles de sécurité (classées selon l'OWASP Top 10) et 1 bug fonctionnel.
 
 | # | Faille v1 constatée | OWASP Top 10 2021 | Correction v2 |
 | --- | --- | --- | --- |
@@ -25,14 +25,16 @@ Audit réalisé en novembre 2026 sur la première version, en la faisant tourner
 | 4 | XSS stocké : un message contenant `<script>` s'exécutait chez le destinataire | A03 Injection | Affichage uniquement via `textContent`, jamais `innerHTML` ; Content-Security-Policy stricte sans script inline |
 | 5 | Envoi de message par requête GET, sans protection CSRF | A01, A04 | Écritures en POST JSON avec jeton CSRF obligatoire |
 | 6 | Aucune limite de tentatives de connexion | A07 | 5 échecs par 15 minutes ; clé de limitation = HMAC(e-mail + IP), rien n'est stocké en clair |
-| 7 | Messages d'erreur révélant l'existence d'un compte | A07 | Message générique ; sel factice mais stable pour les comptes inexistants ; vérification à temps constant |
+| 7 | Messages d'erreur révélant l'existence d'un compte | A07 | À la connexion : message générique, sel factice mais stable pour les comptes inexistants, temps de réponse comparable (un hachage est calculé même sans compte) |
 | 8 | Identifiants de base de données dans le code versionné | A05 Mauvaise configuration | `config/config.php` hors dépôt Git ; racine web limitée à `public/` |
 | 9 | Aucun en-tête de sécurité | A05 | CSP, HSTS, X-Frame-Options, nosniff, Referrer-Policy, Permissions-Policy |
 | 10 | Bug : utilisateur non connecté après inscription | — | Corrigé |
 
 ## Tests effectués (v2)
 
-- Parcours complet dans un navigateur automatisé (Playwright) : inscription de deux comptes, message texte, envoi d'une photo, réponse, numéro de sécurité identique des deux côtés.
+Les deux scripts sont dans `tests/` et peuvent être relancés : `tests/e2e.js` (Playwright, parcours complet) et `tests/securite.sh` (attaques côté serveur).
+
+- Parcours complet dans un navigateur automatisé (Playwright) : inscription de deux comptes, message texte, envoi d'une photo et d'un fichier de 7,8 Mo, numéro de sécurité identique des deux côtés.
 - Base de données inspectée : aucun texte de message ni nom de fichier en clair.
 - Cookie forgé `id=2` : refusé (401).
 - Requête POST sans jeton CSRF : refusée (403).
@@ -44,6 +46,7 @@ Audit réalisé en novembre 2026 sur la première version, en la faisant tourner
 
 - La clé de conversation est statique entre deux personnes : pas de confidentialité persistante (*forward secrecy*). Étape suivante : un protocole à double cliquet (type Signal).
 - Les métadonnées (qui parle à qui, quand) restent visibles du serveur.
+- L'inscription indique si une adresse e-mail est déjà utilisée : l'existence d'un compte peut donc encore être testée par ce biais.
 - PBKDF2 est utilisé car il est natif dans Web Crypto ; Argon2id côté navigateur (via libsodium/WebAssembly) serait plus résistant.
 - Le serveur distribue les clés publiques : la vérification du numéro de sécurité est ce qui protège contre une substitution de clé.
 - Pas encore d'authentification à deux facteurs (WebAuthn / FIDO2 prévu).
