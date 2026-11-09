@@ -210,6 +210,15 @@
     return (n / 1048576).toFixed(1).replace('.', ',') + ' Mo';
   }
 
+  // Icône construite élément par élément : aucun innerHTML dans l'application.
+  function downloadIcon() {
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.createElementNS(NS, 'svg');
+    for (const [k, v] of Object.entries({ viewBox: '0 0 24 24', width: '18', height: '18', fill: 'none', stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round', 'stroke-linejoin': 'round' })) svg.setAttribute(k, v);
+    for (const d of ['M12 4v11', 'm7 10 5 5 5-5', 'M5 20h14']) { const path = document.createElementNS(NS, 'path'); path.setAttribute('d', d); svg.append(path); }
+    return svg;
+  }
+
   function fileCard(url, name, type, size) {
     const ext = (name.includes('.') ? name.split('.').pop() : '').toLowerCase();
     const found = FILE_KINDS.find(([, , re]) => re.test(ext)) || ['other', 'Fichier'];
@@ -228,7 +237,7 @@
     info.append(fname, meta);
 
     const dl = document.createElement('span'); dl.className = 'file-dl'; dl.setAttribute('aria-hidden', 'true');
-    dl.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg>';
+    dl.append(downloadIcon());
 
     a.append(icon, info, dl);
     return a;
